@@ -108,8 +108,12 @@ def test_path_contains_only_files_not_dir_or_symbolic_links(small_root_dir:str) 
 
 def test_path_contains_only_directory_and_files_in_it(small_recursive_root_dir:str)-> None:
     file_list = StandardDirTraversal('./' + small_recursive_root_dir).traverse()
-    assert len(file_list) == 10
-    check_small_file(file_list)
+    directory = [x for x in file_list if x.type == FileType.DIR]
+    files = [x for x in file_list if x.type == FileType.FILE]
+    assert len(file_list) == 11
+    assert len(directory) == 1
+    assert len(files) == 10
+    check_small_file(files)
     with OSFS('.') as fs:
         fs.removetree(small_recursive_root_dir)
 
