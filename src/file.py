@@ -11,3 +11,6 @@ class File:
     size: int
     permissions: int
     category:FileCategory = 'undefined'
+
+    def __str__(self) -> str:
+        return f'{self.path} {self.type} {self.permissions} {self.ext} {self.size} {self.category}'

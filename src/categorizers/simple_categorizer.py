@@ -18,3 +18,10 @@ class SimpleCategorizer:
                     break
 
         return categorize_files
+
+    def make_report(self) -> None:
+        print('\n\nSize Analysis: ')
+        for category in self.categories:
+            print(category.category_type,' : ',category.total_size)
+
+        print('\n')

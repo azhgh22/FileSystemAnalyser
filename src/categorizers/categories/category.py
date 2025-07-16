@@ -39,5 +39,7 @@ class Category:
                 self.total_size = self.total_size + file.size
         except PermissionError:
             pass
+        except IsADirectoryError:
+            pass
 
         return file

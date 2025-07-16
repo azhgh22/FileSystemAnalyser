@@ -1,12 +1,24 @@
 from src.file import File
+from src.file_permission_report.group_writable_permission import GroupWritablePermission
+from src.file_permission_report.odd_permission import OddPermission
+from src.file_permission_report.world_executable_permission import WorldExecutablePermission
 
 
 class FilePermissionReport:
     def __init__(self) -> None:
-        self.odd_files = []
+        self.odd_permission:list[OddPermission] = [
+            GroupWritablePermission(),
+            WorldExecutablePermission(),
+            WorldExecutablePermission(),
+        ]
 
     def identify_odd_files(self,files:list[File]):
-        pass
+        for file in files:
+            for perms in self.odd_permission:
+                perms.identify_odd_files(file)
 
     def make_report(self) -> None:
-        pass
+        print('\n\nFile Permissions Report')
+        for perms in self.odd_permission:
+            perms.report()
+        print('\n')
