@@ -1,3 +1,4 @@
+# Entry point for the FileSystemAnalyser CLI tool.
 from src.cli import CLI
 
 if __name__ == '__main__':

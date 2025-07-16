@@ -13,6 +13,7 @@ from src.service import Service
 
 @dataclass
 class StandardDirTraversal:
+    """Performs a standard directory traversal, applying checkers and services to files."""
     dir_path: str
     follow_symlinks: bool = False
     ignore_inaccessible_files: bool = True
@@ -20,6 +21,7 @@ class StandardDirTraversal:
     services:list[Service] = field(default_factory=lambda: [])
 
     def __post_init__(self) -> None:
+        """Validate the directory path and initialize checkers if not provided."""
         if not os.path.exists(self.dir_path):
             raise FileNotFoundError(f"Path '{self.dir_path}' does not exist.")
         if not os.path.isdir(self.dir_path):
@@ -29,6 +31,7 @@ class StandardDirTraversal:
 
 
     def traverse(self) -> list[File]:
+        """Traverse the directory and return a list of File objects."""
         file_list = []
         info = os.stat(self.dir_path)
         visited_inodes:set[tuple[int,int]] = set()
@@ -37,6 +40,7 @@ class StandardDirTraversal:
         return file_list
 
     def __traverse_helper(self,cur_path:str,file_list,visited_inodes:set[tuple[int,int]]) -> None:
+        """Helper function to recursively traverse directories."""
         with os.scandir(cur_path) as entries:
             for entry in entries:
                 path = entry.path
@@ -60,6 +64,7 @@ class StandardDirTraversal:
 
 
     def __validate_checkers(self,file:File,*args:Any) -> None:
+        """Run all checkers on the given file and arguments."""
         for checker in self.checkers:
             if checker.validate(file,self.__traverse_helper,*args):
                 return

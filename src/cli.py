@@ -16,7 +16,9 @@ from src.traversals.traversal import DirTraversal
 
 
 class CLI:
+    """Command-line interface for the FileSystemAnalyser tool."""
     def run(self) -> None:
+        """Main loop to run the CLI tool, handle user input, and execute analysis."""
         while True:
             try:
                 root_path, follow_symlinks, ignore_inaccessible_files, size_threshold = self.read_arguments()
@@ -47,7 +49,8 @@ class CLI:
 
         print("GoodBye")
 
-    def read_arguments(self) -> (str,str,str):
+    def read_arguments(self) -> tuple[str,str,str]:
+        """Prompt the user for required arguments and validate them."""
         root_path = input('Enter root path: ')
         follow_symlinks = input('Follow symlinks [Y/n]: ').lower() == 'y'
         ignore_inaccessible_files = input('Ignore inaccessible files [Y/n]: ').lower() == 'y'
@@ -64,6 +67,7 @@ class CLI:
                         categorizer:Service,
                         permission_reporter:Service,
                         large_files_identifier:Service):
+        """Run the directory traversal and generate all reports."""
         traversal.traverse()
 
         categorizer.make_report()

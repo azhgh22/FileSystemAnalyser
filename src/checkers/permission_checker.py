@@ -7,10 +7,12 @@ from src.file import File
 
 @dataclass
 class PermissionChecker:
+    """Checker to validate directory read permissions."""
     permission_to_validate:int
     ignore_not_readable_dirs:bool
 
     def validate(self,file:File,callback:Callable[..., Any], *args: Any) -> bool:
+        """Validate if a directory is readable and invoke callback if so."""
         if file.type == FileType.DIR:
             if file.permissions & self.permission_to_validate == 0:
                 if self.ignore_not_readable_dirs:

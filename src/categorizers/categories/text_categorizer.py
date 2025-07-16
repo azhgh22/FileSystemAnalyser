@@ -3,7 +3,9 @@ from src.enums.file_category import FileCategory
 
 
 class TextCategorizer(Category):
+    """Categorizes files as text based on extension and MIME type."""
     def __init__(self):
+        """Initialize with text MIME types and extensions."""
         total_size:int = 0
         mime_type:list[str] = [
             "text/plain",
