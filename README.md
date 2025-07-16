@@ -9,8 +9,6 @@ A command-line tool written in **Python** that analyzes the structure and usage 
 - 📊 Size analysis per file type
 - 🔐 File permission report for unusual settings (e.g., world-writable)
 - 📦 Identification of large files above a given threshold
-- 🛠️ Robust error handling for inaccessible paths
-- 🖥️ Simple CLI interface for configuration
 
 ---
 
