@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -10,7 +11,7 @@ class SymlinkChecker:
     follow_links:bool
 
     def validate(self,file:File,callback:Callable[..., Any], *args: Any) -> bool:
-        if file.type == FileType.SYMLINK and self.follow_links:
+        if file.type == FileType.SYMLINK and os.path.isdir(file.path) and self.follow_links:
             callback(*args)
             return True
 

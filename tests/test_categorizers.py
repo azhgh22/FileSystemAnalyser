@@ -17,7 +17,7 @@ def file() -> File:
 
 def test_should_categorize_file_as_image(file:File) -> None:
     categorizer = ImageCategorizer()
-    file.path = './test_files/horse.jpg'
+    file.path = 'tests/test_files/horse.jpg'
     file.ext = 'jpg'
 
     assert categorizer.categorize(file).category == FileCategory.IMAGE
@@ -25,30 +25,30 @@ def test_should_categorize_file_as_image(file:File) -> None:
 
 def test_should_categorize_file_with_no_extension_as_image(file:File) -> None:
     categorizer = ImageCategorizer()
-    file.path = './test_files/horse.jpg'
+    file.path = 'tests/test_files/horse.jpg'
     file.ext = ''
     assert categorizer.categorize(file).category == FileCategory.IMAGE
     assert categorizer.get_total_size() == 50
 
 def test_should_not_categorize_not_readable_file_with_no_extension_as_executable_with_permissions(file:File) -> None:
-    os.chmod('./test_files/babyrop_level_not_readable', 0o111)
+    os.chmod('tests/test_files/babyrop_level_not_readable', 0o111)
     categorizer = ExecutableCategorizer()
-    file.path = './test_files/babyrop_level_not_readable'
+    file.path = 'tests/test_files/babyrop_level_not_readable'
     file.permissions = 0o211
     assert categorizer.categorize(file).category == FileCategory.UNDEFINED
     assert categorizer.get_total_size() == 0
-    os.chmod('./test_files/babyrop_level_not_readable', 0o777)
+    os.chmod('tests/test_files/babyrop_level_not_readable', 0o777)
 
 def test_should_categorize_file_as_executable(file:File) -> None:
     categorizer = ExecutableCategorizer()
-    file.path = './test_files/babyrop_level15.0'
+    file.path = 'tests/test_files/babyrop_level15.0'
 
     assert categorizer.categorize(file).category == FileCategory.EXECUTABLE
     assert categorizer.get_total_size() == 50
 
 def test_should_categorize_file_as_text(file:File) -> None:
     categorizer = TextCategorizer()
-    file.path = './test_files/main.html'
+    file.path = 'tests/test_files/main.html'
     file.ext = 'html'
 
     assert categorizer.categorize(file).category == FileCategory.TEXT
@@ -62,12 +62,12 @@ def test_should_categorize_file_as_video(file:File) -> None:
     assert categorizer.get_total_size() == 50
 
 def test_should_categorize_all_files() -> None:
-    os.chmod('./test_files/babyrop_level_not_readable', 0o111)
+    os.chmod('tests/test_files/babyrop_level_not_readable', 0o111)
     file_list = [
-        File(type=FileType.FILE, path='./test_files/babyrop_level15.0', ext='', size=50, permissions=0o777),
-        File(type=FileType.FILE, path='./test_files/babyrop_level_not_readable', ext='', size=50, permissions=0o111),
-        File(type=FileType.FILE, path='./test_files/horse.jpg', ext='jpg', size=50, permissions=0o777),
-        File(type=FileType.FILE, path='./test_files/main.html', ext='html', size=50, permissions=0o777)
+        File(type=FileType.FILE, path=f'tests/test_files/babyrop_level15.0', ext='', size=50, permissions=0o777),
+        File(type=FileType.FILE, path='tests/test_files/babyrop_level_not_readable', ext='', size=50, permissions=0o111),
+        File(type=FileType.FILE, path='tests/test_files/horse.jpg', ext='jpg', size=50, permissions=0o777),
+        File(type=FileType.FILE, path='tests/test_files/main.html', ext='html', size=50, permissions=0o777)
     ]
 
     categorizer = SimpleCategorizer([ExecutableCategorizer(),VideoCategorizer(),TextCategorizer(),ImageCategorizer()])
@@ -82,5 +82,5 @@ def test_should_categorize_all_files() -> None:
     assert len(executable) == 1
     assert len(text) == 1
 
-    os.chmod('./test_files/babyrop_level_not_readable', 0o777)
+    os.chmod('tests/test_files/babyrop_level_not_readable', 0o777)
 

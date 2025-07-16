@@ -19,15 +19,16 @@ A command-line tool written in **Python** that analyzes the structure and usage 
 
 ### Dependencies
 
-Installed via `pip`: pip install -r requirements.txt
+Installed via `pip`: pip3 install -r requirements.txt
 
 ## 🛠️ Usage
 
 ```bash
-python FileSystemAnalyser/src/main.py
+cd FileSystemAnalyser/
+python3.13 -m src.main
 
 🧪 Running Tests
-pytest FileSystemAnalyser/tests/
+pytest ./tests/
 
 👤 Author
 Archil Zhghenti
