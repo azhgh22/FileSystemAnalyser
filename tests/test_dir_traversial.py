@@ -1,8 +1,7 @@
 import os
 from fs.osfs import OSFS
-from src.dir_traversial import StandardDirTraversal, File
+from src.traversals.standard_dir_traversal import StandardDirTraversal, File
 import pytest
-import stat
 
 from src.enums.file_type import FileType
 
@@ -70,6 +69,43 @@ def big_recursive_root_dir() -> str:
 
     return 'root'
 
+@pytest.fixture
+def root_with_symlink() -> str:
+    # remove if exists
+    if os.path.exists('./root'):
+        try:
+            os.unlink("./root/src")
+        except OSError:
+            pass
+        with OSFS('.') as fs:
+            fs.removetree('root')
+
+    os.mkdir('root')
+    for i in range(10):
+        open(f"root/{i}.txt", "a").close()
+
+    # open(f"root/src", "a").close()
+    os.symlink('../root','./root/src')
+
+    return 'root'
+
+
+def check_small_file(file_list: list[File]) -> None:
+    for file in file_list:
+        print(file.path, file.ext, file.size, file.type, file.permissions)
+        assert file.type == FileType.FILE
+        assert file.size == 0
+        assert file.ext == 'txt'
+
+def traverse_checker(file_list:list[File],full_count:int,dir_count,file_count:int) -> None:
+    directory = [x for x in file_list if x.type == FileType.DIR]
+    files = [x for x in file_list if x.type == FileType.FILE]
+
+    assert len(file_list) == full_count
+    assert len(directory) == dir_count
+    assert len(files) == file_count
+    check_small_file(files)
+
 def test_path_does_not_exist() -> None:
     try:
         StandardDirTraversal('./bla').traverse()
@@ -91,66 +127,61 @@ def test_path_is_empty() -> None:
     assert StandardDirTraversal('./root').traverse() == []
     os.rmdir("root")
 
-
-def check_small_file(file_list: list[File]) -> None:
-    for file in file_list:
-        print(file.path, file.ext, file.size, file.type, file.permissions)
-        assert file.type == FileType.FILE
-        assert file.size == 0
-        assert file.ext == 'txt'
-
 def test_path_contains_only_files_not_dir_or_symbolic_links(small_root_dir:str) -> None:
     file_list = StandardDirTraversal('./' + small_root_dir).traverse()
-    assert len(file_list) == 10
-    check_small_file(file_list)
+    traverse_checker(file_list,10,0,10)
     with OSFS('.') as fs:
         fs.removetree(small_root_dir)
 
 def test_path_contains_only_directory_and_files_in_it(small_recursive_root_dir:str)-> None:
     file_list = StandardDirTraversal('./' + small_recursive_root_dir).traverse()
-    directory = [x for x in file_list if x.type == FileType.DIR]
-    files = [x for x in file_list if x.type == FileType.FILE]
-    assert len(file_list) == 11
-    assert len(directory) == 1
-    assert len(files) == 10
-    check_small_file(files)
+    print('file_count: ', len(file_list))
+    traverse_checker(file_list,11,1,10)
     with OSFS('.') as fs:
         fs.removetree(small_recursive_root_dir)
 
 def test_path_with_files_and_directories(medium_recursive_root_dir:str) -> None:
     file_list = StandardDirTraversal('./' + medium_recursive_root_dir).traverse()
-
-    directory = [x for x in file_list if x.type==FileType.DIR]
-    files = [x for x in file_list if x.type==FileType.FILE]
-
-    assert len(file_list) == 21
-    assert len(directory) == 1
-    assert len(files) == 20
-
-    check_small_file(files)
+    traverse_checker(file_list, 21, 1, 20)
     with OSFS('.') as fs:
         fs.removetree(medium_recursive_root_dir)
 
 def test_path_with_multiple_dirs_and_files(big_recursive_root_dir:str) -> None:
     file_list = StandardDirTraversal('./' + big_recursive_root_dir).traverse()
-    directory = [x for x in file_list if x.type == FileType.DIR]
-    files = [x for x in file_list if x.type == FileType.FILE]
-
-    assert len(file_list) == 120
-    assert len(directory) == 10
-    assert len(files) == 110
-    check_small_file(files)
+    traverse_checker(file_list, 120, 10, 110)
     with OSFS('.') as fs:
         fs.removetree(big_recursive_root_dir)
 
-def test_path_contains_inaccessible_directory(small_root_dir:str) -> None:
-    # os.chmod(f'./root/0.txt', stat.S_IWUSR | stat.S_IXUSR)
-
-    file_list = StandardDirTraversal(small_root_dir).traverse()
-    # os.chmod(f'{medium_recursive_root_dir}/subdir', 0o000)
-
-    # assert len(file_list) == 21
-    check_small_file(file_list)
-
+def test_path_contains_inaccessible_directory(medium_recursive_root_dir:str) -> None:
+    os.chmod(f'{medium_recursive_root_dir}/subdir', 0o111)
+    file_list = StandardDirTraversal(medium_recursive_root_dir).traverse()
+    traverse_checker(file_list,11,1,10)
+    os.chmod(f'{medium_recursive_root_dir}/subdir', 0o777)
     with OSFS('.') as fs:
-        fs.removetree(small_root_dir)
+        fs.removetree(medium_recursive_root_dir)
+
+def test_path_contains_symlink_to_directory_and_do_not_follow_symlinks(root_with_symlink:str)-> None:
+    file_list = StandardDirTraversal(root_with_symlink,follow_symlinks=False).traverse()
+    symlink = [x for x in file_list if x.type == FileType.SYMLINK]
+    files = [x for x in file_list if x.type == FileType.FILE]
+
+    assert len(file_list) == 11
+    assert len(symlink) == 1
+    assert len(files) == 10
+    check_small_file(files)
+
+    print('file_count: ',len(file_list))
+    for file in file_list:
+        print(file.path, file.ext, file.size, file.type, file.permissions)
+
+    os.unlink("./root/src")
+    with OSFS('.') as fs:
+        fs.removetree(root_with_symlink)
+
+
+def test_path_contains_symlink_to_directory_and_follow_symlinks_with_cycle(root_with_symlink:str)-> None:
+    file_list = StandardDirTraversal(root_with_symlink,follow_symlinks=True).traverse()
+    assert len(file_list) == 11
+    os.unlink("./root/src")
+    with OSFS('.') as fs:
+        fs.removetree(root_with_symlink)
