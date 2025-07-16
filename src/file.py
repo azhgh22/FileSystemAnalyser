@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any
+
+from src.enums.file_category import FileCategory
 
 
 @dataclass
@@ -9,6 +10,4 @@ class File:
     ext: str
     size: int
     permissions: int
-
-    # def __eq__(self, other: Any) -> bool:
-    #     pass
+    category:FileCategory = 'undefined'
