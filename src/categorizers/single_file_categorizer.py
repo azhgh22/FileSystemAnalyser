@@ -5,19 +5,16 @@ from src.enums.file_category import FileCategory
 from src.file import File
 
 @dataclass
-class SimpleCategorizer:
+class SingleCategorizer:
     categories:list[Category] = field(default_factory=lambda: [])
 
-    def categorize(self,files:list[File]) -> list[File]:
-        categorize_files = []
-        for file in files:
-            for category in self.categories:
-                new_file = category.categorize(file)
-                if new_file.category != FileCategory.UNDEFINED:
-                    categorize_files.append(new_file)
-                    break
+    def fit(self,file:File) -> File:
+        for category in self.categories:
+            new_file = category.categorize(file)
+            if new_file.category != FileCategory.UNDEFINED:
+                break
 
-        return categorize_files
+        return file
 
     def make_report(self) -> None:
         print('\n\nSize Analysis: ')

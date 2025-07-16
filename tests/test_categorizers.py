@@ -6,7 +6,7 @@ from src.categorizers.categories.executable_categorizer import ExecutableCategor
 from src.categorizers.categories.image_categorizer import ImageCategorizer
 from src.categorizers.categories.text_categorizer import TextCategorizer
 from src.categorizers.categories.video_categorizer import VideoCategorizer
-from src.categorizers.simple_categorizer import SimpleCategorizer
+from src.categorizers.single_file_categorizer import SingleCategorizer
 from src.enums.file_category import FileCategory
 from src.enums.file_type import FileType
 from src.file import File
@@ -70,17 +70,15 @@ def test_should_categorize_all_files() -> None:
         File(type=FileType.FILE, path='tests/test_files/main.html', ext='html', size=50, permissions=0o777)
     ]
 
-    categorizer = SimpleCategorizer([ExecutableCategorizer(),VideoCategorizer(),TextCategorizer(),ImageCategorizer()])
-    result = categorizer.categorize(file_list)
-    img = [x for x in result if x.category==FileCategory.IMAGE]
-    video = [x for x in result if x.category == FileCategory.VIDEO]
-    executable = [x for x in result if x.category == FileCategory.EXECUTABLE]
-    text = [x for x in result if x.category == FileCategory.TEXT]
+    answers = [FileCategory.EXECUTABLE,FileCategory.UNDEFINED,FileCategory.IMAGE,FileCategory.TEXT]
 
-    assert len(img) == 1
-    assert len(video) == 0
-    assert len(executable) == 1
-    assert len(text) == 1
+    categorizer = SingleCategorizer(
+        [ExecutableCategorizer(), VideoCategorizer(), TextCategorizer(), ImageCategorizer()])
+
+    for i in range(len(answers)):
+        result = categorizer.fit(file_list[i])
+        assert result.category == answers[i]
+
 
     os.chmod('tests/test_files/babyrop_level_not_readable', 0o777)
 

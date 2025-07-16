@@ -1,6 +1,3 @@
-from asyncio import Protocol
-from dataclasses import dataclass, field
-
 import magic
 
 from src.enums.file_category import FileCategory

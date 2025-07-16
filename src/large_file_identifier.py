@@ -7,9 +7,11 @@ class LargeFileIdentifier:
         self.size_threshold = size_threshold
         self.large_files:list[File] = []
 
-    def identify_large_files(self,files:list[File]) -> list[File]:
-        self.large_files = list(filter(lambda x: (x.size > self.size_threshold and x.type==FileType.FILE), files))
-        return self.large_files
+    def fit(self,file:File) -> File:
+        if file.size > self.size_threshold and file.type==FileType.FILE:
+            self.large_files.append(file)
+
+        return file
 
     def make_report(self) -> None:
         print('\n\nLarge Files')
@@ -17,3 +19,6 @@ class LargeFileIdentifier:
             print(file)
 
         print('\n')
+
+    def get_files(self) -> list[File]:
+        return self.large_files

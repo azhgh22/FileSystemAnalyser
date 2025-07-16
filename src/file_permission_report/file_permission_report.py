@@ -13,10 +13,11 @@ class FilePermissionReport:
             WorldWritablePermission(),
         ]
 
-    def identify_odd_files(self,files:list[File]):
-        for file in files:
-            for perms in self.odd_permission:
-                perms.identify_odd_files(file)
+    def fit(self,file:File) -> File:
+        for perms in self.odd_permission:
+            perms.identify_odd_files(file)
+
+        return file
 
     def make_report(self) -> None:
         print('\n\nFile Permissions Report')

@@ -7,10 +7,10 @@ from src.categorizers.categories.executable_categorizer import ExecutableCategor
 from src.categorizers.categories.image_categorizer import ImageCategorizer
 from src.categorizers.categories.text_categorizer import TextCategorizer
 from src.categorizers.categories.video_categorizer import VideoCategorizer
-from src.categorizers.simple_categorizer import SimpleCategorizer
-from src.categorizers.type_categoryzer import TypeCategorizer
+from src.categorizers.single_file_categorizer import SingleCategorizer
 from src.file_permission_report.file_permission_report import FilePermissionReport
 from src.large_file_identifier import LargeFileIdentifier
+from src.service import Service
 from src.traversals.standard_dir_traversal import StandardDirTraversal
 from src.traversals.traversal import DirTraversal
 
@@ -20,16 +20,23 @@ class CLI:
         while True:
             try:
                 root_path, follow_symlinks, ignore_inaccessible_files, size_threshold = self.read_arguments()
-                traversal = StandardDirTraversal(root_path,follow_symlinks,ignore_inaccessible_files)
-                categorizer = SimpleCategorizer(categories=[
+                categorizer = SingleCategorizer(categories=[
                     TextCategorizer(),
                     ExecutableCategorizer(),
                     VideoCategorizer(),
                     ImageCategorizer()
                 ])
-                permission_reported = FilePermissionReport()
+                permission_reporter = FilePermissionReport()
                 large_files_identifier = LargeFileIdentifier(size_threshold)
-                self.run_tool(traversal,categorizer,permission_reported,large_files_identifier)
+
+                traversal = StandardDirTraversal(root_path,follow_symlinks,ignore_inaccessible_files,services=[
+                    categorizer,
+                    permission_reporter,
+                    large_files_identifier
+                ])
+
+
+                self.run_tool(traversal,categorizer,permission_reporter,large_files_identifier)
             except Exception as e:
                 print(e)
 
@@ -54,14 +61,10 @@ class CLI:
         return root_path, follow_symlinks, ignore_inaccessible_files,large_file_threshold
 
     def run_tool(self,  traversal:DirTraversal,
-                        categorizer:TypeCategorizer,
-                        permission_reporter:FilePermissionReport,
-                        large_files_identifier:LargeFileIdentifier):
-        files = traversal.traverse()
-
-        categorizer.categorize(files)
-        permission_reporter.identify_odd_files(files)
-        large_files_identifier.identify_large_files(files)
+                        categorizer:Service,
+                        permission_reporter:Service,
+                        large_files_identifier:Service):
+        traversal.traverse()
 
         categorizer.make_report()
         permission_reporter.make_report()

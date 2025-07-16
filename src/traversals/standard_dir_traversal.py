@@ -2,11 +2,13 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from src.categorizers.single_file_categorizer import SingleCategorizer
 from src.checkers.checker import Checker
 from src.checkers.permission_checker import PermissionChecker
 from src.checkers.symlink_checker import SymlinkChecker
 from src.enums.file_type import FileType
 from src.file import File
+from src.service import Service
 
 
 @dataclass
@@ -15,6 +17,7 @@ class StandardDirTraversal:
     follow_symlinks: bool = False
     ignore_inaccessible_files: bool = True
     checkers:list[Checker] = field(default_factory=lambda: [])
+    services:list[Service] = field(default_factory=lambda: [])
 
     def __post_init__(self) -> None:
         if not os.path.exists(self.dir_path):
@@ -23,6 +26,7 @@ class StandardDirTraversal:
             raise ValueError(f"Path '{self.dir_path}' is not a directory.")
         if len(self.checkers) != 0: return
         self.checkers = [PermissionChecker(0o400, self.ignore_inaccessible_files), SymlinkChecker(self.follow_symlinks)]
+
 
     def traverse(self) -> list[File]:
         file_list = []
@@ -41,6 +45,10 @@ class StandardDirTraversal:
                 ext = entry.name.split('.')[-1] if '.' in entry.name else ''
                 file_type = FileType.get_file_type(entry.path)
                 new_file = File(type=file_type, path=path, ext=ext, size=size, permissions=permissions)
+
+                for service in self.services:
+                    service.fit(new_file)
+
                 file_list.append(new_file)
 
                 if (entry.stat().st_dev,entry.stat().st_ino) in visited_inodes:
