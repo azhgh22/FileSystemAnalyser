@@ -14,7 +14,7 @@ A command-line tool written in **Python** that analyzes the structure and usage 
 
 ## 🧰 Requirements
 
-- Python **3.10+**
+- Python **3.13+**
 - Works on **Linux** (not fully tested on Windows/macOS)
 
 ### Dependencies
