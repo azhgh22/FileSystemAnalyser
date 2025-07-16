@@ -5,9 +5,9 @@ A command-line tool written in **Python** that analyzes the structure and usage 
 ## 🚀 Features
 
 - 🔁 Recursive directory traversal
-- 🗂️ File type categorization (text, image, executable, etc.)
-- 📊 Size analysis per file type
-- 🔐 File permission report for unusual settings (e.g., world-writable)
+- 🗂️ File type categorization (text, image, executable, video)
+- 📊 Size report per file type
+- 🔐 File permission report for unusual settings (group-writable,world-executable, world-writable)
 - 📦 Identification of large files above a given threshold
 
 ---
