@@ -11,6 +11,7 @@ from src.categorizers.single_file_categorizer import SingleCategorizer
 from src.file_permission_report.file_permission_report import FilePermissionReport
 from src.large_file_identifier import LargeFileIdentifier
 from src.service import Service
+from src.traversals.parallel_traversal import ParallelTraversal
 from src.traversals.standard_dir_traversal import StandardDirTraversal
 from src.traversals.traversal import DirTraversal
 
@@ -31,7 +32,7 @@ class CLI:
                 permission_reporter = FilePermissionReport()
                 large_files_identifier = LargeFileIdentifier(size_threshold)
 
-                traversal = StandardDirTraversal(root_path,follow_symlinks,ignore_inaccessible_files,services=[
+                traversal = ParallelTraversal(root_path,follow_symlinks,ignore_inaccessible_files,services=[
                     categorizer,
                     permission_reporter,
                     large_files_identifier
@@ -49,7 +50,7 @@ class CLI:
 
         print("GoodBye")
 
-    def read_arguments(self) -> tuple[str,str,str]:
+    def read_arguments(self) -> tuple[str,bool,bool,int]:
         """Prompt the user for required arguments and validate them."""
         root_path = input('Enter root path: ')
         follow_symlinks = input('Follow symlinks [Y/n]: ').lower() == 'y'
