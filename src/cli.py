@@ -22,7 +22,7 @@ class CLI:
         """Main loop to run the CLI tool, handle user input, and execute analysis."""
         while True:
             try:
-                root_path, follow_symlinks, ignore_inaccessible_files, size_threshold = self.read_arguments()
+                root_path, follow_symlinks, ignore_inaccessible_files, size_threshold, large_files_support = self.read_arguments()
                 categorizer = SingleCategorizer(categories=[
                     TextCategorizer(),
                     ExecutableCategorizer(),
@@ -32,12 +32,18 @@ class CLI:
                 permission_reporter = FilePermissionReport()
                 large_files_identifier = LargeFileIdentifier(size_threshold)
 
-                traversal = ParallelTraversal(root_path,follow_symlinks,ignore_inaccessible_files,services=[
-                    categorizer,
-                    permission_reporter,
-                    large_files_identifier
-                ])
-
+                if large_files_support:
+                    traversal = ParallelTraversal(root_path,follow_symlinks,ignore_inaccessible_files,services=[
+                        categorizer,
+                        permission_reporter,
+                        large_files_identifier
+                    ])
+                else:
+                    traversal = StandardDirTraversal(root_path, follow_symlinks, ignore_inaccessible_files, services=[
+                        categorizer,
+                        permission_reporter,
+                        large_files_identifier
+                    ])
 
                 self.run_tool(traversal,categorizer,permission_reporter,large_files_identifier)
             except Exception as e:
@@ -56,13 +62,14 @@ class CLI:
         follow_symlinks = input('Follow symlinks [Y/n]: ').lower() == 'y'
         ignore_inaccessible_files = input('Ignore inaccessible files [Y/n]: ').lower() == 'y'
         large_file_threshold = input('enter size threshold for large files: ')
+        large_files_support = input('enter Y if you want parallel traversal [Y/n]: ').lower() == 'y'
 
         try:
             large_file_threshold = int(large_file_threshold)
         except ValueError:
             raise ValueError('threshold must be number')
 
-        return root_path, follow_symlinks, ignore_inaccessible_files,large_file_threshold
+        return root_path, follow_symlinks, ignore_inaccessible_files,large_file_threshold, large_files_support
 
     def run_tool(self,  traversal:DirTraversal,
                         categorizer:Service,
