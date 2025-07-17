@@ -56,7 +56,7 @@ class CLI:
 
         print("GoodBye")
 
-    def read_arguments(self) -> tuple[str,bool,bool,int]:
+    def read_arguments(self) -> tuple[str,bool,bool,int,bool]:
         """Prompt the user for required arguments and validate them."""
         root_path = input('Enter root path: ')
         follow_symlinks = input('Follow symlinks [Y/n]: ').lower() == 'y'

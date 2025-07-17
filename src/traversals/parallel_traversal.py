@@ -2,7 +2,6 @@ import os
 import threading
 from dataclasses import dataclass, field
 from functools import reduce
-from threading import Condition
 from typing import Any
 
 from src.checkers.checker import Checker
@@ -16,7 +15,7 @@ from queue import Queue
 
 @dataclass
 class ParallelTraversal:
-    """Performs a parallel directory traversal, work distributed among n workers ,
+    """Performs a parallel directory traversal, work distributed among n(number of cores on computer) workers ,
      applying checkers and services to files."""
     dir_path: str
     follow_symlinks: bool = False
